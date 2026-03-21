@@ -1,9 +1,11 @@
 import pygame
 from config import Config
 from game import Game
+from database import Database
 from renderer import Renderer
 
 def main():
+    database = Database()
     config = Config()  
     game = Game(config)
     renderer = Renderer(game)
@@ -31,6 +33,24 @@ def main():
                     game.canon_actif = not game.canon_actif
                 if event.key == pygame.K_t:  
                     game.terminer()
+                if event.key == pygame.K_s:
+                    nom = input("Nom de la sauvegarde : ")
+                    database.sauvegarder(game, nom)
+                    print("Partie sauvegardée !")
+                if event.key == pygame.K_l:
+                    parties = database.liste_parties()
+                    for p in parties:
+                        print(p["nom"], "-", p["date"])
+                    nom = input("Nom de la partie à charger : ")
+                    partie = database.charger(nom)
+                    if partie:
+                        game.board = partie["board"]
+                        game.current_player = partie["current_player"]
+                        game.score_j1 = partie["score_j1"]
+                        game.score_j2 = partie["score_j2"]
+                        print("Partie chargée !")
+                    else:
+                        print("Partie introuvable !")        
         renderer.draw(game)
         renderer.clock.tick(60)
 if __name__ == "__main__":
